@@ -7,31 +7,33 @@
   :root { 
     --gold: #c4a661; 
     --dark: #050505; 
-    --luxury-beige: #2a261f; /* Un beige ahumado profundo */
   }
 
+  /* * EL FONDO: 
+   * Cambiamos a "to bottom" y permitimos que fluya con el scroll. 
+   * Empieza en negro profundo, pasa por beige ahumado y termina en arena clara.
+   */
   body { 
-    /* El gradiente se fija a la ventana (fixed) para que el brillo siempre esté abajo */
     background: linear-gradient(
-      0deg, 
-      #24211a 0%,    /* Beige metálico en la base */
-      #13110e 20%,   /* Transición suave */
-      #050505 60%,   /* Regreso al negro profundo */
-      #050505 100%
+      to bottom, 
+      #050505 0%,     /* Arriba: Negro profundo */
+      #161410 30%,    /* Medio-Alto: Beige ahumado oscuro */
+      #3b3326 70%,    /* Medio-Bajo: Transición a arena */
+      #8a7b61 100%    /* Abajo: Arena clara (luxury sand) */
     );
-    background-attachment: fixed;
     color: #a3a3a3; 
     font-family: 'Inter', sans-serif; 
     margin: 0; 
     overflow-x: hidden; 
+    min-height: 100vh; /* Asegura que cubra toda la altura */
   }
 
-  /* Capa iridiscente sutil */
+  /* Capa iridiscente sutil (brillo superior/estático) */
   body::before {
     content: "";
     position: fixed;
     inset: 0;
-    background: radial-gradient(circle at 50% 120%, rgba(196, 166, 97, 0.1) 0%, transparent 70%);
+    background: radial-gradient(circle at 50% 0%, rgba(196, 166, 97, 0.05) 0%, transparent 60%);
     pointer-events: none;
     z-index: 0;
   }
@@ -53,11 +55,12 @@
     height: 100%; 
     object-fit: cover; 
     filter: grayscale(100%) brightness(0.4); 
-    transition: 1.5s ease; 
+    transition: 1.5s ease; /* Transición suave de 1.5 segundos */
     transform: scale(1.1); 
   }
   
-  .card-group:hover .img-glow { 
+  /* NUEVA REGLA: En lugar de hover directo, usamos la clase dinámica is-glowing */
+  .card-group.is-glowing .img-glow { 
     filter: grayscale(0%) brightness(1); 
     transform: scale(1); 
   }
@@ -73,6 +76,15 @@
 <div class="relative min-h-screen pb-64" x-data="{ 
     open: false, 
     activeContent: {},
+    hoveredCard: null,
+    autoGlowCard: 1,
+    init() {
+      setInterval(() => {
+        if (this.hoveredCard === null) {
+          this.autoGlowCard = this.autoGlowCard >= 6 ? 1 : this.autoGlowCard + 1;
+        }
+      }, 2500);
+    },
     content: {
         staff_total: { title: '11 FOH Staff Allocation', days: 'Strategic Deployment', table: [
             { el: 'L37 Foundation', dt: '1 Head Waiter, 1 Chef de Rang, 1 Sommelier, 1 Barback' },
@@ -125,7 +137,7 @@
 
   <header class="relative h-[85vh] flex flex-col items-center justify-center text-center px-6">
     <img src="pot.png" class="absolute inset-0 w-full h-full object-cover opacity-30 grayscale">
-    <div class="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-transparent"></div>
+    <div class="absolute inset-0 bg-gradient-to-b from-black/60 via-[#050505]/50 to-transparent"></div>
     <div class="relative z-10">
       <h1 class="font-luxury text-6xl md:text-8xl text-white mb-6">Our Potential</h1>
       <div class="arch-line mx-auto mb-10 opacity-30"></div>
@@ -146,66 +158,90 @@
     </div>
   </header>
 
-  <section class="max-w-4xl mx-auto py-32 px-10 border-b border-white/5">
+  <section class="max-w-4xl mx-auto py-32 px-10 border-b border-white/5 relative z-10">
     <div class="space-y-8">
       <h2 class="font-luxury text-2xl gold-accent italic tracking-widest text-center">The Philosophy</h2>
       <div class="h-px w-20 bg-gold-accent mx-auto opacity-30"></div>
-      <p class="text-2xl md:text-3xl text-white font-light text-center leading-relaxed italic">
+      <p class="text-2xl md:text-3xl text-white font-light text-center leading-relaxed italic drop-shadow-lg">
         "People bring people. Smaller spaces are easier to fill and naturally more appealing."
       </p>
-      <p class="text-sm text-gray-500 leading-relaxed text-center max-w-2xl mx-auto font-light">
+      <p class="text-sm text-gray-300 leading-relaxed text-center max-w-2xl mx-auto font-light">
         We manage guest flow across three floors, creating distinct experiences at different times of day. 
         More transactions, staff integrated into revenue zones, and a cinematic journey from height to height.
       </p>
     </div>
   </section>
 
-  <main class="max-w-7xl mx-auto px-10 py-32 space-y-48">
+  <main class="max-w-7xl mx-auto px-10 py-32 space-y-48 relative z-10">
     
     <div class="space-y-12">
-      <h2 class="font-luxury text-xl text-white opacity-40 border-b border-white/5 pb-4">Level 37 // Foundation</h2>
+      <h2 class="font-luxury text-xl text-white opacity-60 border-b border-white/10 pb-4">Level 37 // Foundation</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-20">
-        <div class="card-group cursor-pointer" @click="open = true; activeContent = content.open_case">
+        <div class="card-group cursor-pointer" 
+             @mouseenter="hoveredCard = 1" 
+             @mouseleave="hoveredCard = null"
+             :class="{'is-glowing': hoveredCard === 1 || (hoveredCard === null && autoGlowCard === 1)}"
+             @click="open = true; activeContent = content.open_case">
           <div class="img-container"><img src="open.png" class="img-glow"></div>
           <h3 class="font-luxury text-lg text-white mt-6 italic">The Open Case</h3>
-          <p class="text-[9px] gold-accent uppercase tracking-widest mt-2 opacity-70 italic">Funky House & Disco // Turntable // Amber Glow</p>
+          <p class="text-[9px] gold-accent uppercase tracking-widest mt-2 opacity-90 italic drop-shadow-md">Funky House & Disco // Turntable // Amber Glow</p>
         </div>
-        <div class="card-group cursor-pointer" @click="open = true; activeContent = content.b37">
+        <div class="card-group cursor-pointer"
+             @mouseenter="hoveredCard = 2" 
+             @mouseleave="hoveredCard = null"
+             :class="{'is-glowing': hoveredCard === 2 || (hoveredCard === null && autoGlowCard === 2)}"
+             @click="open = true; activeContent = content.b37">
           <div class="img-container"><img src="B37.png" class="img-glow"></div>
           <h3 class="font-luxury text-lg text-white mt-6 italic">Fine Dining</h3>
-          <p class="text-[9px] gold-accent uppercase tracking-widest mt-2 opacity-70 italic">Refined // Exclusive // Architectural</p>
+          <p class="text-[9px] gold-accent uppercase tracking-widest mt-2 opacity-90 italic drop-shadow-md">Refined // Exclusive // Architectural</p>
         </div>
       </div>
     </div>
 
     <div class="space-y-12">
-      <h2 class="font-luxury text-xl text-white opacity-40 border-b border-white/5 pb-4">Level 38 // Social Heart</h2>
+      <h2 class="font-luxury text-xl text-white opacity-60 border-b border-white/10 pb-4">Level 38 // Social Heart</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-20">
-        <div class="card-group cursor-pointer" @click="open = true; activeContent = content.bar38">
+        <div class="card-group cursor-pointer"
+             @mouseenter="hoveredCard = 3" 
+             @mouseleave="hoveredCard = null"
+             :class="{'is-glowing': hoveredCard === 3 || (hoveredCard === null && autoGlowCard === 3)}"
+             @click="open = true; activeContent = content.bar38">
           <div class="img-container"><img src="38bar.png" class="img-glow"></div>
           <h3 class="font-luxury text-lg text-white mt-6 italic">Panoramic Bar</h3>
-          <p class="text-[9px] gold-accent uppercase tracking-widest mt-2 opacity-70 italic">House & Ethnic Lounge // Laboratory Fun</p>
+          <p class="text-[9px] gold-accent uppercase tracking-widest mt-2 opacity-90 italic drop-shadow-md">House & Ethnic Lounge // Laboratory Fun</p>
         </div>
-        <div class="card-group cursor-pointer" @click="open = true; activeContent = content.aviary">
+        <div class="card-group cursor-pointer"
+             @mouseenter="hoveredCard = 4" 
+             @mouseleave="hoveredCard = null"
+             :class="{'is-glowing': hoveredCard === 4 || (hoveredCard === null && autoGlowCard === 4)}"
+             @click="open = true; activeContent = content.aviary">
           <div class="img-container"><img src="Aviary.png" class="img-glow"></div>
           <h3 class="font-luxury text-lg text-white mt-6 italic">The Aviary</h3>
-          <p class="text-[9px] gold-accent uppercase tracking-widest mt-2 opacity-70 italic">Blues & British Hits // Casual Executive Lunch</p>
+          <p class="text-[9px] gold-accent uppercase tracking-widest mt-2 opacity-90 italic drop-shadow-md">Blues & British Hits // Casual Executive Lunch</p>
         </div>
       </div>
     </div>
 
     <div class="space-y-12">
-      <h2 class="font-luxury text-xl text-white opacity-40 border-b border-white/5 pb-4">Level 39 // The Peak</h2>
+      <h2 class="font-luxury text-xl text-white opacity-80 border-b border-white/20 pb-4 drop-shadow-md">Level 39 // The Peak</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-20">
-        <div class="card-group cursor-pointer" @click="open = true; activeContent = content.club">
+        <div class="card-group cursor-pointer"
+             @mouseenter="hoveredCard = 5" 
+             @mouseleave="hoveredCard = null"
+             :class="{'is-glowing': hoveredCard === 5 || (hoveredCard === null && autoGlowCard === 5)}"
+             @click="open = true; activeContent = content.club">
           <div class="img-container"><img src="Club.png" class="img-glow"></div>
-          <h3 class="font-luxury text-lg text-white mt-6 italic">Highland Club</h3>
-          <p class="text-[9px] gold-accent uppercase tracking-widest mt-2 opacity-70 italic">Japanese Jazz 80s // Speakeasy Intimacy</p>
+          <h3 class="font-luxury text-lg text-white mt-6 italic drop-shadow-md">Highland Club</h3>
+          <p class="text-[9px] gold-accent uppercase tracking-widest mt-2 opacity-90 italic drop-shadow-md">Japanese Jazz 80s // Speakeasy Intimacy</p>
         </div>
-        <div class="card-group cursor-pointer" @click="open = true; activeContent = content.dj">
+        <div class="card-group cursor-pointer"
+             @mouseenter="hoveredCard = 6" 
+             @mouseleave="hoveredCard = null"
+             :class="{'is-glowing': hoveredCard === 6 || (hoveredCard === null && autoGlowCard === 6)}"
+             @click="open = true; activeContent = content.dj">
           <div class="img-container"><img src="saxo.png" class="img-glow"></div>
-          <h3 class="font-luxury text-lg text-white mt-6 italic">Terrace Sessions</h3>
-          <p class="text-[9px] gold-accent uppercase tracking-widest mt-2 opacity-70 italic">Electronic & Latino // Electric Saxo // High Energy</p>
+          <h3 class="font-luxury text-lg text-white mt-6 italic drop-shadow-md">Terrace Sessions</h3>
+          <p class="text-[9px] gold-accent uppercase tracking-widest mt-2 opacity-90 italic drop-shadow-md">Electronic & Latino // Electric Saxo // High Energy</p>
         </div>
       </div>
     </div>
