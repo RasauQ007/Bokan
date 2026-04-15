@@ -5,49 +5,62 @@
   @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@200;400;600&display=swap');
   
   :root { 
-    --gold: #c4a661; 
-    --dark: #050505; 
+    --gold: #8c6d31; 
+    --spark-color: rgba(140, 109, 49, 0.4);
   }
 
-  /* * EL FONDO: 
-   * Cambiamos a "to bottom" y permitimos que fluya con el scroll. 
-   * Empieza en negro profundo, pasa por beige ahumado y termina en arena clara.
-   */
   body { 
     background: linear-gradient(
       to bottom, 
-      #050505 0%,     /* Arriba: Negro profundo */
-      #161410 30%,    /* Medio-Alto: Beige ahumado oscuro */
-      #3b3326 70%,    /* Medio-Bajo: Transición a arena */
-      #8a7b61 100%    /* Abajo: Arena clara (luxury sand) */
+      #050505 0%,      
+      #1c1a17 15%,     
+      #c4b5a2 40%,     
+      #e3d9c6 100%     
     );
-    color: #a3a3a3; 
+    color: #4a453e; 
     font-family: 'Inter', sans-serif; 
     margin: 0; 
     overflow-x: hidden; 
-    min-height: 100vh; /* Asegura que cubra toda la altura */
+    min-height: 100vh;
   }
 
-  /* Capa iridiscente sutil (brillo superior/estático) */
-  body::before {
-    content: "";
+  /* --- DISCREET SPARKS / STARDUST --- */
+  .particles-container {
     position: fixed;
-    inset: 0;
-    background: radial-gradient(circle at 50% 0%, rgba(196, 166, 97, 0.05) 0%, transparent 60%);
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     pointer-events: none;
-    z-index: 0;
+    z-index: 1;
   }
 
-  .font-luxury { font-family: 'Cinzel', serif; text-transform: uppercase; letter-spacing: 0.2em; }
-  .gold-accent { color: var(--gold); }
-  .arch-line { background: linear-gradient(90deg, transparent, rgba(196,166,97,0.3), transparent); height: 1px; width: 100%; }
-  
+  .spark {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: var(--gold);
+    border-radius: 50%;
+    opacity: 0;
+    animation: rise 10s infinite ease-in;
+  }
+
+  @keyframes rise {
+    0% { transform: translateY(100vh) scale(0); opacity: 0; }
+    20% { opacity: 0.6; }
+    80% { opacity: 0.3; }
+    100% { transform: translateY(-10vh) scale(1.5); opacity: 0; }
+  }
+
+  /* --- IMAGE POP & GLOW --- */
   .img-container { 
     position: relative; 
     overflow: hidden; 
-    border: 1px solid rgba(255,255,255,0.05); 
+    border: 1px solid rgba(0,0,0,0.05); 
     background: #111; 
     aspect-ratio: 16/10; 
+    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1); /* The "Pop" transition */
   }
   
   .img-glow { 
@@ -55,22 +68,29 @@
     height: 100%; 
     object-fit: cover; 
     filter: grayscale(100%) brightness(0.4); 
-    transition: 1.5s ease; /* Transición suave de 1.5 segundos */
-    transform: scale(1.1); 
+    transition: 1s ease;
+    transform: scale(1.0); 
   }
   
-  /* NUEVA REGLA: En lugar de hover directo, usamos la clase dinámica is-glowing */
-  .card-group.is-glowing .img-glow { 
-    filter: grayscale(0%) brightness(1); 
-    transform: scale(1); 
+  /* Active state: Zoom the container AND the image for a "layered" pop effect */
+  .card-group.is-glowing .img-container {
+    transform: scale(1.03); /* Tiny pop out towards user */
+    border: 1px solid rgba(140, 109, 49, 0.3);
+    box-shadow: 0 20px 50px rgba(140, 109, 49, 0.15);
   }
 
-  .modal-scroll {
-    overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch;
-    max-height: 85vh;
+  .card-group.is-glowing .img-glow { 
+    filter: grayscale(0%) brightness(1.1); 
+    transform: scale(1.05); /* Slight internal zoom */
   }
+
+  header h1, header p { color: white !important; }
+  .font-luxury { font-family: 'Cinzel', serif; text-transform: uppercase; letter-spacing: 0.2em; }
+  .gold-accent { color: var(--gold); }
+  .level-title { color: #2a2825; border-bottom: 1px solid rgba(0,0,0,0.1); }
   [x-cloak] { display: none !important; }
+
+  .modal-scroll { overflow-y: auto !important; max-height: 85vh; }
 </style>
 
 <div class="relative min-h-screen pb-64" x-data="{ 
@@ -83,91 +103,61 @@
         if (this.hoveredCard === null) {
           this.autoGlowCard = this.autoGlowCard >= 6 ? 1 : this.autoGlowCard + 1;
         }
-      }, 2500);
+      }, 1000); 
     },
     content: {
-        staff_total: { title: '11 FOH Staff Allocation', days: 'Strategic Deployment', table: [
-            { el: 'L37 Foundation', dt: '1 Head Waiter, 1 Chef de Rang, 1 Sommelier, 1 Barback' },
-            { el: 'L38 Social', dt: '2 Bartenders, 1 Waiter, 1 Barback' },
-            { el: 'L39 Peak', dt: '1 Sommelier, 1 Bartender, 1 Barback' }
-        ]},
-        revenue_loss: { title: 'Revenue Delta', days: 'Current Financial Reality', table: [
-            { el: 'Annual Loss', dt: '-£42,000 against PY' },
-            { el: 'Pricing Strategy', dt: 'Heavy discounting required to maintain occupancy.' }
-        ]},
-        kitchen: { title: 'Unified Kitchen', days: 'Production Hub', table: [
-            { el: 'Prep Hub', dt: 'Centralized Mise en Place' },
-            { el: 'Service', dt: 'High-speed Plating (L37) & Social Bites (L38/39)' }
-        ]},
-        b37: { title: 'Bokan 37 Fine Dining', days: 'Tuesday - Saturday', staff: '1 Head Waiter + 1 Chef de Rang', cap: '50/100 ppl', rev: '£43.2k/mo', table: [
-            { el: 'Concept', dt: 'Refined, exclusive, quiet destination dining.' },
-            { el: 'Offer', dt: 'Tasting menu with wine pairing.' },
-            { el: 'Target', dt: 'Business dinners, special occasions.' },
-            { el: 'Avg Check', dt: '£80 P.P.' }
-        ]},
-        open_case: { title: 'The Open Case (L37)', days: 'Tuesday - Saturday', staff: '1 Sommelier + 1 Barback', cap: '38/152 ppl', rev: '£49.7k/mo', table: [
-            { el: 'Concept', dt: 'Intimate social space; room within a room.' },
-            { el: 'Offer', dt: 'Social bites, olives, focaccia, cheeses.' },
-            { el: 'Private', dt: 'Partition allows for Chef’s Table / PDR bookings.' },
-            { el: 'Commercial', dt: 'Capture pre-dinner spend.' }
-        ]},
-        bar38: { title: 'Bokan 38 Cocktail Bar', days: 'Monday - Sunday', staff: '2 Bartenders + 1 Barback', cap: '90/630 ppl', rev: '£23.12k/mo', table: [
-            { el: 'Concept', dt: 'Laboratory, experimental, fun social heart.' },
-            { el: 'Corporate', dt: 'Bucket beers, self-pour shared cocktails.' },
-            { el: 'Offer', dt: 'Signature mixology & elevated bar snacks.' }
-        ]},
-        aviary: { title: 'The Aviary (L38)', days: 'Monday - Sunday (Lunch)', staff: '1 Waiter + Team Support', cap: '52/260 ppl', rev: '£87.4k/mo', table: [
-            { el: 'Concept', dt: 'Lively, accessible casual executive dining.' },
-            { el: 'Offer', dt: 'Executive open-menu lunch. 1-2 courses.' },
-            { el: 'Target', dt: 'Local corporate & leisure guests.' },
-            { el: 'Avg Check', dt: '£35' }
-        ]},
-        club: { title: 'Highland Club (L39)', days: 'Thursday - Sunday', staff: '1 Sommelier + 1 Bartender', cap: '42/168 ppl', rev: '£120.3k/mo', table: [
-            { el: 'Concept', dt: 'Mysterious, intimate speakeasy.' },
-            { el: 'Offer', dt: 'Rare spirit trolley, expert guidance.' },
-            { el: 'Sunday', dt: 'Live student jazz (low-cost atmosphere).' },
-            { el: 'Intent', dt: 'Capture late-night spend.' }
-        ]},
-        dj: { title: '39 Terrace & DJ', days: 'Friday - Saturday Peak', staff: '1 Bartender + 1 Barback', cap: 'Standing Social', rev: '£46.2k/mo', table: [
-            { el: 'Vibe', dt: 'Latino, Electronic, Electric Saxo.' },
-            { el: 'Energy', dt: 'Final stop for guests before return to rooms.' }
-        ]}
+        staff_total: { title: '11 FOH Staff Allocation', days: 'Strategic Deployment', table: [{ el: 'L37 Foundation', dt: '1 Head Waiter, 1 Chef de Rang, 1 Sommelier, 1 Barback' },{ el: 'L38 Social', dt: '2 Bartenders, 1 Waiter, 1 Barback' },{ el: 'L39 Peak', dt: '1 Sommelier, 1 Bartender, 1 Barback' }]},
+        revenue_loss: { title: 'Revenue Delta', days: 'Current Financial Reality', table: [{ el: 'Annual Loss', dt: '-£42,000 against PY' },{ el: 'Pricing Strategy', dt: 'Heavy discounting required to maintain occupancy.' }]},
+        kitchen: { title: 'Unified Kitchen', days: 'Production Hub', table: [{ el: 'Prep Hub', dt: 'Centralized Mise en Place' },{ el: 'Service', dt: 'High-speed Plating (L37) & Social Bites (L38/39)' }]},
+        b37: { title: 'Bokan 37 Fine Dining', days: 'Tuesday - Saturday', staff: '1 Head Waiter + 1 Chef de Rang', cap: '50/100 ppl', rev: '£43.2k/mo', table: [{ el: 'Concept', dt: 'Refined, exclusive destination dining.' },{ el: 'Avg Check', dt: '£80 P.P.' }]},
+        open_case: { title: 'The Open Case (L37)', days: 'Tuesday - Saturday', staff: '1 Sommelier + 1 Barback', cap: '38/152 ppl', rev: '£49.7k/mo', table: [{ el: 'Concept', dt: 'Intimate social space; room within a room.' },{ el: 'Offer', dt: 'Social bites, cheeses.' }]},
+        bar38: { title: 'Bokan 38 Cocktail Bar', days: 'Monday - Sunday', staff: '2 Bartenders + 1 Barback', cap: '90/630 ppl', rev: '£23.12k/mo', table: [{ el: 'Concept', dt: 'Laboratory, experimental social heart.' }]},
+        aviary: { title: 'The Aviary (L38)', days: 'Monday - Sunday (Lunch)', staff: '1 Waiter + Support', cap: '52/260 ppl', rev: '£87.4k/mo', table: [{ el: 'Concept', dt: 'Lively casual executive dining.' },{ el: 'Avg Check', dt: '£35' }]},
+        club: { title: 'Highland Club (L39)', days: 'Thursday - Sunday', staff: '1 Sommelier + 1 Bartender', cap: '42/168 ppl', rev: '£120.3k/mo', table: [{ el: 'Concept', dt: 'Mysterious speakeasy.' },{ el: 'Offer', dt: 'Rare spirit trolley.' }]},
+        dj: { title: '39 Terrace & DJ', days: 'Friday - Saturday Peak', staff: '1 Bartender + 1 Barback', cap: 'Standing Social', rev: '£46.2k/mo', table: [{ el: 'Vibe', dt: 'Latino, Electronic, Electric Saxo.' }]}
     }
 }">
 
+  <div class="particles-container">
+    <div class="spark" style="left: 10%; animation-delay: 0s;"></div>
+    <div class="spark" style="left: 25%; animation-delay: 2s;"></div>
+    <div class="spark" style="left: 40%; animation-delay: 4s;"></div>
+    <div class="spark" style="left: 55%; animation-delay: 1s;"></div>
+    <div class="spark" style="left: 70%; animation-delay: 6s;"></div>
+    <div class="spark" style="left: 85%; animation-delay: 3s;"></div>
+    <div class="spark" style="left: 15%; animation-delay: 7s;"></div>
+    <div class="spark" style="left: 90%; animation-delay: 5s;"></div>
+  </div>
+
   <header class="relative h-[85vh] flex flex-col items-center justify-center text-center px-6">
-    <img src="pot.png" class="absolute inset-0 w-full h-full object-cover opacity-30 grayscale">
-    <div class="absolute inset-0 bg-gradient-to-b from-black/60 via-[#050505]/50 to-transparent"></div>
+    <img src="pot.png" class="absolute inset-0 w-full h-full object-cover opacity-40 grayscale">
+    <div class="absolute inset-0 bg-gradient-to-b from-black/80 via-black/20 to-transparent"></div>
     <div class="relative z-10">
-      <h1 class="font-luxury text-6xl md:text-8xl text-white mb-6">Our Potential</h1>
+      <h1 class="font-luxury text-6xl md:text-8xl mb-6">Our Potential</h1>
       <div class="arch-line mx-auto mb-10 opacity-30"></div>
       <div class="flex flex-wrap justify-center gap-8 md:gap-24 mt-12">
         <div @click="open = true; activeContent = content.staff_total" class="cursor-pointer group">
           <p class="text-[10px] gold-accent tracking-[0.4em] uppercase mb-2">FOH Staff</p>
-          <p class="text-5xl font-luxury text-white">11</p>
+          <p class="text-5xl font-luxury">11</p>
         </div>
         <div @click="open = true; activeContent = content.revenue_loss" class="cursor-pointer group">
-          <p class="text-[10px] text-red-500 tracking-[0.4em] uppercase mb-2">Delta PY</p>
-          <p class="text-5xl font-luxury text-white">42<span class="text-2xl italic text-red-500">k</span></p>
+          <p class="text-[10px] text-red-400 tracking-[0.4em] uppercase mb-2">Delta PY</p>
+          <p class="text-5xl font-luxury">42<span class="text-2xl italic text-red-400">k</span></p>
         </div>
         <div @click="open = true; activeContent = content.kitchen" class="cursor-pointer group">
           <p class="text-[10px] gold-accent tracking-[0.4em] uppercase mb-2">Kitchen</p>
-          <p class="text-5xl font-luxury text-white">01</p>
+          <p class="text-5xl font-luxury">01</p>
         </div>
       </div>
     </div>
   </header>
 
-  <section class="max-w-4xl mx-auto py-32 px-10 border-b border-white/5 relative z-10">
-    <div class="space-y-8">
-      <h2 class="font-luxury text-2xl gold-accent italic tracking-widest text-center">The Philosophy</h2>
+  <section class="max-w-4xl mx-auto py-32 px-10 border-b border-black/5 relative z-10">
+    <div class="space-y-8 text-center">
+      <h2 class="font-luxury text-2xl gold-accent italic tracking-widest">The Philosophy</h2>
       <div class="h-px w-20 bg-gold-accent mx-auto opacity-30"></div>
-      <p class="text-2xl md:text-3xl text-white font-light text-center leading-relaxed italic drop-shadow-lg">
+      <p class="text-2xl md:text-3xl text-[#2a2825] font-light leading-relaxed italic">
         "People bring people. Smaller spaces are easier to fill and naturally more appealing."
-      </p>
-      <p class="text-sm text-gray-300 leading-relaxed text-center max-w-2xl mx-auto font-light">
-        We manage guest flow across three floors, creating distinct experiences at different times of day. 
-        More transactions, staff integrated into revenue zones, and a cinematic journey from height to height.
       </p>
     </div>
   </section>
@@ -175,109 +165,95 @@
   <main class="max-w-7xl mx-auto px-10 py-32 space-y-48 relative z-10">
     
     <div class="space-y-12">
-      <h2 class="font-luxury text-xl text-white opacity-60 border-b border-white/10 pb-4">Level 37 // Foundation</h2>
+      <h2 class="font-luxury text-xl level-title pb-4">Level 37 // Foundation</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-20">
         <div class="card-group cursor-pointer" 
-             @mouseenter="hoveredCard = 1" 
-             @mouseleave="hoveredCard = null"
+             @mouseenter="hoveredCard = 1" @mouseleave="hoveredCard = null"
              :class="{'is-glowing': hoveredCard === 1 || (hoveredCard === null && autoGlowCard === 1)}"
              @click="open = true; activeContent = content.open_case">
-          <div class="img-container"><img src="open.png" class="img-glow"></div>
-          <h3 class="font-luxury text-lg text-white mt-6 italic">The Open Case</h3>
-          <p class="text-[9px] gold-accent uppercase tracking-widest mt-2 opacity-90 italic drop-shadow-md">Funky House & Disco // Turntable // Amber Glow</p>
+          <div class="img-container shadow-xl"><img src="open.png" class="img-glow"></div>
+          <h3 class="font-luxury text-lg text-gray-800 mt-8 italic">The Open Case</h3>
+          <p class="text-[9px] gold-accent uppercase tracking-widest mt-2 font-bold">Turntable // Amber Glow</p>
         </div>
         <div class="card-group cursor-pointer"
-             @mouseenter="hoveredCard = 2" 
-             @mouseleave="hoveredCard = null"
+             @mouseenter="hoveredCard = 2" @mouseleave="hoveredCard = null"
              :class="{'is-glowing': hoveredCard === 2 || (hoveredCard === null && autoGlowCard === 2)}"
              @click="open = true; activeContent = content.b37">
-          <div class="img-container"><img src="B37.png" class="img-glow"></div>
-          <h3 class="font-luxury text-lg text-white mt-6 italic">Fine Dining</h3>
-          <p class="text-[9px] gold-accent uppercase tracking-widest mt-2 opacity-90 italic drop-shadow-md">Refined // Exclusive // Architectural</p>
+          <div class="img-container shadow-xl"><img src="B37.png" class="img-glow"></div>
+          <h3 class="font-luxury text-lg text-gray-800 mt-8 italic">Fine Dining</h3>
+          <p class="text-[9px] gold-accent uppercase tracking-widest mt-2 font-bold">Refined // Exclusive</p>
         </div>
       </div>
     </div>
 
     <div class="space-y-12">
-      <h2 class="font-luxury text-xl text-white opacity-60 border-b border-white/10 pb-4">Level 38 // Social Heart</h2>
+      <h2 class="font-luxury text-xl level-title pb-4">Level 38 // Social Heart</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-20">
         <div class="card-group cursor-pointer"
-             @mouseenter="hoveredCard = 3" 
-             @mouseleave="hoveredCard = null"
+             @mouseenter="hoveredCard = 3" @mouseleave="hoveredCard = null"
              :class="{'is-glowing': hoveredCard === 3 || (hoveredCard === null && autoGlowCard === 3)}"
              @click="open = true; activeContent = content.bar38">
-          <div class="img-container"><img src="38bar.png" class="img-glow"></div>
-          <h3 class="font-luxury text-lg text-white mt-6 italic">Panoramic Bar</h3>
-          <p class="text-[9px] gold-accent uppercase tracking-widest mt-2 opacity-90 italic drop-shadow-md">House & Ethnic Lounge // Laboratory Fun</p>
+          <div class="img-container shadow-xl"><img src="38bar.png" class="img-glow"></div>
+          <h3 class="font-luxury text-lg text-gray-800 mt-8 italic">Panoramic Bar</h3>
+          <p class="text-[9px] gold-accent uppercase tracking-widest mt-2 font-bold">Experimental // Laboratory</p>
         </div>
         <div class="card-group cursor-pointer"
-             @mouseenter="hoveredCard = 4" 
-             @mouseleave="hoveredCard = null"
+             @mouseenter="hoveredCard = 4" @mouseleave="hoveredCard = null"
              :class="{'is-glowing': hoveredCard === 4 || (hoveredCard === null && autoGlowCard === 4)}"
              @click="open = true; activeContent = content.aviary">
-          <div class="img-container"><img src="Aviary.png" class="img-glow"></div>
-          <h3 class="font-luxury text-lg text-white mt-6 italic">The Aviary</h3>
-          <p class="text-[9px] gold-accent uppercase tracking-widest mt-2 opacity-90 italic drop-shadow-md">Blues & British Hits // Casual Executive Lunch</p>
+          <div class="img-container shadow-xl"><img src="Aviary.png" class="img-glow"></div>
+          <h3 class="font-luxury text-lg text-gray-800 mt-8 italic">The Aviary</h3>
+          <p class="text-[9px] gold-accent uppercase tracking-widest mt-2 font-bold">Casual Executive Lunch</p>
         </div>
       </div>
     </div>
 
     <div class="space-y-12">
-      <h2 class="font-luxury text-xl text-white opacity-80 border-b border-white/20 pb-4 drop-shadow-md">Level 39 // The Peak</h2>
+      <h2 class="font-luxury text-xl level-title pb-4">Level 39 // The Peak</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-20">
         <div class="card-group cursor-pointer"
-             @mouseenter="hoveredCard = 5" 
-             @mouseleave="hoveredCard = null"
+             @mouseenter="hoveredCard = 5" @mouseleave="hoveredCard = null"
              :class="{'is-glowing': hoveredCard === 5 || (hoveredCard === null && autoGlowCard === 5)}"
              @click="open = true; activeContent = content.club">
-          <div class="img-container"><img src="Club.png" class="img-glow"></div>
-          <h3 class="font-luxury text-lg text-white mt-6 italic drop-shadow-md">Highland Club</h3>
-          <p class="text-[9px] gold-accent uppercase tracking-widest mt-2 opacity-90 italic drop-shadow-md">Japanese Jazz 80s // Speakeasy Intimacy</p>
+          <div class="img-container shadow-xl"><img src="Club.png" class="img-glow"></div>
+          <h3 class="font-luxury text-lg text-gray-800 mt-8 italic">Highland Club</h3>
+          <p class="text-[9px] gold-accent uppercase tracking-widest mt-2 font-bold">Japanese Jazz // Intimate</p>
         </div>
         <div class="card-group cursor-pointer"
-             @mouseenter="hoveredCard = 6" 
-             @mouseleave="hoveredCard = null"
+             @mouseenter="hoveredCard = 6" @mouseleave="hoveredCard = null"
              :class="{'is-glowing': hoveredCard === 6 || (hoveredCard === null && autoGlowCard === 6)}"
              @click="open = true; activeContent = content.dj">
-          <div class="img-container"><img src="saxo.png" class="img-glow"></div>
-          <h3 class="font-luxury text-lg text-white mt-6 italic drop-shadow-md">Terrace Sessions</h3>
-          <p class="text-[9px] gold-accent uppercase tracking-widest mt-2 opacity-90 italic drop-shadow-md">Electronic & Latino // Electric Saxo // High Energy</p>
+          <div class="img-container shadow-xl"><img src="saxo.png" class="img-glow"></div>
+          <h3 class="font-luxury text-lg text-gray-800 mt-8 italic">Terrace Sessions</h3>
+          <p class="text-[9px] gold-accent uppercase tracking-widest mt-2 font-bold">Electronic // High Energy</p>
         </div>
       </div>
     </div>
   </main>
 
-  <div x-show="open" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-10" x-transition>
-    <div class="absolute inset-0 bg-black/95 backdrop-blur-2xl" @click="open = false"></div>
-    <div class="relative bg-zinc-950 border border-white/10 w-full max-w-2xl p-6 md:p-12 shadow-2xl modal-scroll">
+  <div x-show="open" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4" x-transition>
+    <div class="absolute inset-0 bg-black/90 backdrop-blur-xl" @click="open = false"></div>
+    <div class="relative bg-zinc-950 border border-white/10 w-full max-w-2xl p-8 md:p-12 shadow-2xl modal-scroll text-white">
       <button @click="open = false" class="absolute top-4 right-4 gold-accent text-[10px] uppercase tracking-widest bg-white/5 px-3 py-1">Close</button>
-      
       <div class="mb-10">
-        <h2 class="font-luxury text-2xl md:text-3xl text-white italic mb-2" x-text="activeContent.title"></h2>
+        <h2 class="font-luxury text-2xl italic mb-2" x-text="activeContent.title"></h2>
         <p class="text-[10px] gold-accent uppercase tracking-widest font-bold border-b border-white/10 pb-4" x-text="activeContent.days"></p>
       </div>
-
       <div class="grid grid-cols-2 gap-4 mb-8" x-show="activeContent.rev">
           <div class="bg-white/5 p-4 border-l border-yellow-600/40">
-              <p class="text-[8px] text-gray-500 uppercase tracking-widest mb-1 italic">Monthly Reach</p>
-              <p class="text-sm text-white" x-text="activeContent.cap"></p>
+              <p class="text-[8px] text-gray-400 uppercase tracking-widest mb-1 italic">Monthly Reach</p>
+              <p class="text-sm" x-text="activeContent.cap"></p>
           </div>
           <div class="bg-white/5 p-4 border-l border-green-800/40">
-              <p class="text-[8px] text-gray-500 uppercase tracking-widest mb-1 italic">Est. Revenue</p>
+              <p class="text-[8px] text-gray-400 uppercase tracking-widest mb-1 italic">Est. Revenue</p>
               <p class="text-lg gold-accent font-bold" x-text="activeContent.rev"></p>
           </div>
       </div>
-
-      <div class="mb-8 p-4 border border-white/5 bg-white/5 flex justify-between items-center" x-show="activeContent.staff">
-          <span class="text-[9px] text-gray-500 uppercase tracking-widest">FOH Staffing</span>
-          <span class="text-xs text-white font-bold" x-text="activeContent.staff"></span>
-      </div>
-
       <div class="space-y-4">
         <template x-for="row in activeContent.table">
           <div class="flex justify-between border-b border-white/5 pb-2">
-            <span class="text-[9px] text-gray-500 uppercase font-bold tracking-widest" x-text="row.el"></span>
-            <span class="text-xs text-white text-right max-w-[180px]" x-text="row.dt"></span>
+            <span class="text-[9px] text-gray-400 uppercase font-bold tracking-widest" x-text="row.el"></span>
+            <span class="text-xs text-right max-w-[180px]" x-text="row.dt"></span>
           </div>
         </template>
       </div>
